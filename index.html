@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de WebSocket</title>
+</head>
+
+<body>
+    <h1>Exemplo de WebSocket com JavaScript</h1>
+    <button id="connectBtn">Conectar</button>
+    <button id="disconnectBtn" disabled>Desconectar</button>
+    <p id="status">Status: Desconectado</p>
+
+    <div style="display: flex;">
+        <input type="text" id="messageInput" placeholder="Digite uma mensagem" disabled />
+        <button id="sendBtn" disabled>Enviar Mensagem</button>
+    </div>
+
+    <p id="messages"></p>
+
+    <script>
+        let socket;
+
+        const fieldConnectBtn = document.getElementById('connectBtn');
+        const fieldDisconnectBtn = document.getElementById('disconnectBtn');
+        const fieldStatus = document.getElementById('status');
+        const fieldMessageInput = document.getElementById('messageInput');
+        const fieldSendBtn = document.getElementById('sendBtn');
+        const fieldMessages = document.getElementById('messages');
+
+        // Conectar ao WebSocket
+        fieldConnectBtn.addEventListener('click', () => {
+            socket = new WebSocket('ws://localhost:8080');
+
+            socket.onopen = () => {
+                fieldStatus.textContent = 'Status: Conectado';
+                fieldSendBtn.disabled = false;
+                fieldMessageInput.disabled = false;
+                fieldDisconnectBtn.disabled = false;
+                console.log('Conectado ao servidor WebSocket.');
+            };
+
+            socket.onmessage = (event) => {
+                // messages.innerHTML += `<p>${event.data}</p>`;
+                // console.log(event.data);
+            };
+
+            socket.onclose = () => {
+                messageInput.value = '';
+                fieldStatus.textContent = 'Status: Desconectado';
+                fieldSendBtn.disabled = true;
+                fieldDisconnectBtn.disabled = true;
+                messageInput.disabled = true;
+            };
+
+            socket.onerror = (error) => {
+                console.error('Erro no WebSocket:', error);
+            };
+        });
+
+        // Enviar mensagem
+        fieldSendBtn.addEventListener('click', () => {
+            const message = fieldMessageInput.value;
+            if (message) {
+                socket.send(message);
+                messages.innerHTML += `<p>Mensagem enviada: ${message}</p>`;
+                console.log('Mensagem enviada:', message);
+            }
+        });
+
+        // Desconectar do WebSocket
+        fieldDisconnectBtn.addEventListener('click', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close(); // Fecha a conexão WebSocket
+                console.log('Desconectado do servidor WebSocket.');
+            }
+        });
+    </script>
+</body>
+
+</html>
